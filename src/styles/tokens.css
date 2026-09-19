@@ -1,4 +1,6 @@
 :root {
+  color-scheme: light;
+
   /* Vibrant & Premium Modern Color Palette */
   --primary: #4F46E5;          /* Vibrant Indigo */
   --primary-hover: #4338CA;
@@ -117,6 +119,8 @@
    Dark Theme Tokens — Modern, Sleek Slate & High Contrast
    ========================================================================== */
 :root[data-theme="dark"] {
+  color-scheme: dark;
+
   --primary: #6366F1;          /* Vibrant Indigo lightened for dark mode */
   --primary-hover: #818CF8;
   --primary-light: #A5B4FC;
@@ -184,8 +188,14 @@
   --shadow-xl: 0 20px 30px -5px rgba(0, 0, 0, 0.7), 0 8px 15px -4px rgba(0, 0, 0, 0.4);
 }
 
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
     --primary: #6366F1;
     --primary-hover: #818CF8;
     --primary-light: #A5B4FC;

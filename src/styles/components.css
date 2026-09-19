@@ -333,8 +333,8 @@
 
 /* Progress & Productivity Block in Rail */
 .rail-progress-card {
-  background: linear-gradient(145deg, #ffffff 0%, var(--primary-soft) 100%);
-  border: 1px solid rgba(99, 102, 241, 0.15);
+  background: linear-gradient(145deg, var(--surface) 0%, var(--primary-soft) 100%);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
   box-shadow: var(--shadow-sm);
@@ -343,6 +343,18 @@
   gap: var(--space-3);
   position: relative;
   overflow: hidden;
+}
+
+:root[data-theme="dark"] .rail-progress-card {
+  background: linear-gradient(145deg, #131B2E 0%, rgba(99, 102, 241, 0.12) 100%);
+  border: 1px solid #23304B;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .rail-progress-card {
+    background: linear-gradient(145deg, #131B2E 0%, rgba(99, 102, 241, 0.12) 100%);
+    border: 1px solid #23304B;
+  }
 }
 
 .rail-progress-card::after {
@@ -386,10 +398,25 @@
   font-weight: var(--font-weight-semibold);
   color: var(--primary);
   font-variant-numeric: tabular-nums;
-  background: #ffffff;
+  background: var(--surface);
+  border: 1px solid var(--border);
   padding: 2px 8px;
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-xs);
+}
+
+:root[data-theme="dark"] .progress-fraction {
+  background: #1E293B;
+  color: #A5B4FC;
+  border-color: #334155;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .progress-fraction {
+    background: #1E293B;
+    color: #A5B4FC;
+    border-color: #334155;
+  }
 }
 
 .progress-track {
@@ -675,7 +702,61 @@
   border-radius: var(--radius-md);
   background-color: var(--surface);
   color: var(--text-2);
+  color-scheme: inherit;
   transition: all var(--transition-fast);
+}
+
+:root[data-theme="dark"] .date-input-field {
+  color-scheme: dark;
+  background-color: var(--surface);
+  color: var(--text);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .date-input-field {
+    color-scheme: dark;
+    background-color: var(--surface);
+    color: var(--text);
+  }
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+.date-input-field::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px;
+  opacity: 0.75;
+  transition: opacity var(--transition-fast), filter var(--transition-fast);
+}
+
+input[type="date"]:hover::-webkit-calendar-picker-indicator,
+.date-input-field:hover::-webkit-calendar-picker-indicator {
+  opacity: 1;
+}
+
+:root[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+:root[data-theme="dark"] .date-input-field::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.5) !important;
+  opacity: 0.95;
+}
+
+:root[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator:hover,
+:root[data-theme="dark"] .date-input-field::-webkit-calendar-picker-indicator:hover {
+  filter: invert(1) brightness(2) !important;
+  opacity: 1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) input[type="date"]::-webkit-calendar-picker-indicator,
+  :root:not([data-theme="light"]) .date-input-field::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(1.5) !important;
+    opacity: 0.95;
+  }
+  :root:not([data-theme="light"]) input[type="date"]::-webkit-calendar-picker-indicator:hover,
+  :root:not([data-theme="light"]) .date-input-field::-webkit-calendar-picker-indicator:hover {
+    filter: invert(1) brightness(2) !important;
+    opacity: 1;
+  }
 }
 
 .date-input-field:hover {
@@ -1293,7 +1374,7 @@
 
 /* Table Footer Summary */
 .table-footer {
-  background: #F8FAFC;
+  background: var(--surface);
   border-top: 1px solid var(--border);
   padding: 10px 20px;
   font-size: 12px;
@@ -1301,6 +1382,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+:root[data-theme="dark"] .table-footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .table-footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+  }
 }
 
 .table-footer-summary {
