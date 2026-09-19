@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { CheckCircle2, Trash2, X, CheckSquare } from 'lucide-react';
 import { Button } from '../ui/Button';
 
@@ -77,3 +78,10 @@ export function BulkActionBar({
     </section>
   );
 }
+
+BulkActionBar.propTypes = {
+  selectedCount: PropTypes.number.isRequired,
+  onCompleteSelected: PropTypes.func.isRequired,
+  onDeleteSelected: PropTypes.func.isRequired,
+  onClearSelection: PropTypes.func.isRequired
+};

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { TaskItem } from './TaskItem';
 import { Checkbox } from '../ui/Checkbox';
 
@@ -89,4 +90,14 @@ export const TaskList = React.memo(function TaskList({
     </div>
   );
 });
+
+TaskList.propTypes = {
+  tasks: PropTypes.arrayOf(PropTypes.object).isRequired,
+  selectedIds: PropTypes.instanceOf(Set),
+  onToggleSelect: PropTypes.func,
+  onToggleSelectAll: PropTypes.func,
+  onToggle: PropTypes.func.isRequired,
+  onEdit: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired
+};
 

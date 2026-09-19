@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { List, Circle, CheckCircle2, Calendar, Clock, AlertTriangle, Eraser } from 'lucide-react';
 import {
   FILTER_ALL,
@@ -11,7 +12,7 @@ import {
 
 /**
  * MobileFilterBar component
- * Horizontal scrollable filter bar for mobile (<640px)
+ * Horizontal scrollable filter bar for mobile (<768px)
  * @param {{
  *  currentFilter: string,
  *  onFilterChange: (filter: string) => void,
@@ -114,3 +115,17 @@ export function MobileFilterBar({
     </div>
   );
 }
+
+MobileFilterBar.propTypes = {
+  currentFilter: PropTypes.string.isRequired,
+  onFilterChange: PropTypes.func.isRequired,
+  counts: PropTypes.shape({
+    total: PropTypes.number.isRequired,
+    active: PropTypes.number.isRequired,
+    completed: PropTypes.number.isRequired,
+    today: PropTypes.number,
+    upcoming: PropTypes.number,
+    overdue: PropTypes.number
+  }).isRequired,
+  onClearCompleted: PropTypes.func.isRequired
+};

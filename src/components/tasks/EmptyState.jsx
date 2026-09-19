@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { CheckCircle2, Search, Sparkles, FolderCheck } from 'lucide-react';
 import { FILTER_ACTIVE, FILTER_COMPLETED } from '../../constants/filters';
 
@@ -77,3 +78,10 @@ export function EmptyState({ filter, searchQuery, totalTasks, onClearSearch }) {
     </div>
   );
 }
+
+EmptyState.propTypes = {
+  filter: PropTypes.string.isRequired,
+  searchQuery: PropTypes.string.isRequired,
+  totalTasks: PropTypes.number.isRequired,
+  onClearSearch: PropTypes.func.isRequired
+};

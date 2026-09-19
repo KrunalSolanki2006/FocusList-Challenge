@@ -156,6 +156,61 @@
   white-space: nowrap;
 }
 
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  border-radius: var(--radius-full);
+  width: 36px;
+  height: 36px;
+  transition: all var(--transition-fast);
+}
+
+.theme-toggle-btn:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  transform: scale(1.08);
+}
+
+.theme-toggle-btn .theme-icon-sun {
+  color: var(--accent);
+  animation: sunSpin 400ms var(--ease-spring);
+}
+
+.theme-toggle-btn .theme-icon-moon {
+  color: var(--primary);
+  animation: moonCrescent 400ms var(--ease-spring);
+}
+
+@keyframes sunSpin {
+  from { transform: rotate(-90deg) scale(0.5); }
+  to { transform: rotate(0deg) scale(1); }
+}
+
+@keyframes moonCrescent {
+  from { transform: rotate(90deg) scale(0.5); }
+  to { transform: rotate(0deg) scale(1); }
+}
+
+.header-backup-btn {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  border-radius: var(--radius-full);
+  width: 36px;
+  height: 36px;
+  transition: all var(--transition-fast);
+}
+
+.header-backup-btn:hover {
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  transform: scale(1.08);
+}
+
 /* Workspace Layout — Desktop / Laptop Default */
 .workspace-container {
   max-width: 1120px;
@@ -826,7 +881,7 @@
 
 /* Table Header */
 .tasks-table thead {
-  background-color: #F8FAFC;
+  background-color: var(--surface-hover);
   border-bottom: 1px solid var(--border);
 }
 
@@ -875,7 +930,7 @@
 
 /* Table Body & Rows */
 .tasks-table tbody tr {
-  border-bottom: 1px solid #F1F5F9;
+  border-bottom: 1px solid var(--border);
   transition: background-color 140ms ease;
 }
 
@@ -884,19 +939,20 @@
 }
 
 .task-table-row:hover {
-  background-color: #F8FAFF;
+  background-color: var(--surface-hover);
 }
 
 .task-table-row.is-selected {
-  background-color: #EEF2FF !important;
+  background-color: var(--primary-soft) !important;
 }
 
 .task-table-row.is-completed {
-  background-color: rgba(248, 250, 252, 0.6);
+  background-color: rgba(var(--surface-rgb, 19, 27, 46), 0.4);
+  opacity: 0.85;
 }
 
 .task-table-row.is-completed:hover {
-  background-color: rgba(241, 245, 249, 0.7);
+  background-color: var(--surface-hover);
 }
 
 .tasks-table td {
@@ -1084,21 +1140,21 @@
 }
 
 .table-pill-priority.priority-high {
-  background: #FEF2F2;
-  color: #DC2626;
-  border: 1px solid #FECACA;
+  background: var(--rose-soft);
+  color: var(--rose);
+  border: 1px solid rgba(244, 63, 94, 0.3);
 }
 
 .table-pill-priority.priority-medium {
-  background: #FFFBEB;
-  color: #D97706;
-  border: 1px solid #FDE68A;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .table-pill-priority.priority-low {
-  background: #EFF6FF;
-  color: #2563EB;
-  border: 1px solid #BFDBFE;
+  background: var(--primary-soft);
+  color: var(--primary);
+  border: 1px solid rgba(99, 102, 241, 0.3);
 }
 
 /* Column 4: Due Date Pill */
@@ -1139,31 +1195,31 @@
 }
 
 .table-pill-date.date-today {
-  background: #ECFDF5;
-  color: #059669;
-  border: 1px solid #A7F3D0;
+  background: var(--emerald-soft);
+  color: var(--emerald);
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .table-pill-date.date-tomorrow {
-  background: #F5F3FF;
-  color: #7C3AED;
-  border: 1px solid #DDD6FE;
+  background: var(--primary-soft);
+  color: var(--primary-light);
+  border: 1px solid rgba(99, 102, 241, 0.3);
 }
 
 .table-pill-date.date-overdue {
-  background: #FFF1F2;
-  color: #E11D48;
-  border: 1px solid #FECDD3;
+  background: var(--rose-soft);
+  color: var(--rose);
+  border: 1px solid rgba(244, 63, 94, 0.3);
 }
 
 .table-pill-date.date-normal {
-  background: #F8FAFC;
-  color: #475569;
-  border: 1px solid #E2E8F0;
+  background: var(--surface-hover);
+  color: var(--text-2);
+  border: 1px solid var(--border);
 }
 
 .table-pill-empty {
-  color: #CBD5E1;
+  color: var(--text-light);
   font-weight: 500;
   font-size: 13px;
 }
@@ -2207,7 +2263,7 @@
   /* Keep Table Headers Visible on Mobile */
   .tasks-table thead {
     display: table-header-group !important;
-    background-color: #F8FAFC !important;
+    background-color: var(--surface-hover) !important;
     border-bottom: 1px solid var(--border) !important;
   }
 
@@ -2259,7 +2315,7 @@
 
   .th-actions, .td-actions {
     display: table-cell !important;
-    width: 76px !important;
+    width: 84px !important;
     text-align: right !important;
     padding: 10px 10px 10px 4px !important;
   }
@@ -2270,18 +2326,19 @@
 
   .task-table-row {
     display: table-row !important;
-    border-bottom: 1px solid #F1F5F9 !important;
+    border-bottom: 1px solid var(--border) !important;
     background: transparent !important;
     box-shadow: none !important;
     border-radius: 0 !important;
   }
 
   .task-table-row:hover {
-    background-color: #F8FAFF !important;
+    background-color: var(--surface-hover) !important;
   }
 
   .task-table-row.is-completed {
-    background-color: rgba(248, 250, 252, 0.6) !important;
+    background-color: rgba(var(--surface-rgb, 19, 27, 46), 0.4) !important;
+    opacity: 0.85;
   }
 
   .task-cell-content {
@@ -2313,17 +2370,17 @@
     display: inline-flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
-    gap: 2px !important;
+    gap: 4px !important;
   }
 
   .table-action-btn {
-    width: 28px !important;
-    height: 28px !important;
-    border-radius: 6px !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 7px !important;
   }
 
   .table-footer {
-    background: #F8FAFC !important;
+    background: var(--surface) !important;
     border-top: 1px solid var(--border) !important;
     padding: 10px 16px !important;
     font-size: 12px !important;

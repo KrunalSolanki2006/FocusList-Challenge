@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   List,
   Circle,
@@ -209,3 +210,23 @@ export function Sidebar({
     </aside>
   );
 }
+
+Sidebar.propTypes = {
+  currentFilter: PropTypes.string.isRequired,
+  onFilterChange: PropTypes.func.isRequired,
+  counts: PropTypes.shape({
+    total: PropTypes.number.isRequired,
+    active: PropTypes.number.isRequired,
+    completed: PropTypes.number.isRequired,
+    today: PropTypes.number,
+    upcoming: PropTypes.number,
+    overdue: PropTypes.number
+  }).isRequired,
+  progress: PropTypes.shape({
+    done: PropTypes.number.isRequired,
+    total: PropTypes.number.isRequired,
+    percentage: PropTypes.number.isRequired
+  }).isRequired,
+  onClearCompleted: PropTypes.func.isRequired,
+  onOpenImportExport: PropTypes.func
+};

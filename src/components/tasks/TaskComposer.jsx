@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import PropTypes from 'prop-types';
 import { Plus, Calendar, AlertCircle, Check, Flag } from 'lucide-react';
 import { validateTitle, MAX_TITLE_LENGTH } from '../../utils/validation';
 import { PRIORITY_NONE, PRIORITY_LOW, PRIORITY_MEDIUM, PRIORITY_HIGH } from '../../constants/priorities';
@@ -210,3 +211,11 @@ export function TaskComposer({ onAddTask, inputRef }) {
     </div>
   );
 }
+
+TaskComposer.propTypes = {
+  onAddTask: PropTypes.func.isRequired,
+  inputRef: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.shape({ current: PropTypes.any })
+  ])
+};

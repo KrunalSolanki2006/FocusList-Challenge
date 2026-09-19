@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { Search, X, ArrowUpDown, Clock, CheckCircle2, AlertTriangle, Sparkles, Database } from 'lucide-react';
 import { useTasks } from './hooks/useTasks';
 import { useToast } from './hooks/useToast';
+import { useTheme } from './hooks/useTheme';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { useHotkeys } from './hooks/useHotkeys';
 import { selectCounts, selectProgress, selectFilteredTasks } from './state/selectors';
@@ -22,6 +23,7 @@ import {
 import { AppHeader } from './components/layout/AppHeader';
 import { Sidebar } from './components/layout/Sidebar';
 import { MobileFilterBar } from './components/layout/MobileFilterBar';
+import { ListToolbar } from './components/layout/ListToolbar';
 
 import { TaskComposer } from './components/tasks/TaskComposer';
 import { TaskList } from './components/tasks/TaskList';
@@ -51,6 +53,7 @@ export function App() {
   } = useTasks();
 
   const { toasts, showToast, dismissToast, pauseTimer, resumeTimer } = useToast();
+  const { theme, resolvedTheme, toggleTheme } = useTheme();
 
   const isMobile = useMediaQuery('(max-width: 767px)');
 
@@ -265,7 +268,12 @@ export function App() {
         Skip to main content
       </a>
 
-      <AppHeader />
+      <AppHeader
+        theme={theme}
+        resolvedTheme={resolvedTheme}
+        onToggleTheme={toggleTheme}
+        onOpenImportExport={handleOpenImportExport}
+      />
 
       {/* Slim progress bar on mobile directly under header */}
       {isMobile && <ProgressSummary progress={progress} />}
@@ -282,7 +290,7 @@ export function App() {
         />
 
         {/* Main Column */}
-        <main id="main-content" className="main-column" tabIndex={-1}>
+        <main id="main-content" className="main-column" tabIndex={-1} aria-label="Tasks management">
           {/* Storage recovery / private mode notice */}
           <StorageBanner
             isCorrupted={state.isCorrupted}
@@ -329,66 +337,16 @@ export function App() {
           )}
 
           {/* List Toolbar (Search, Sort & Backup) */}
-          <div className="list-toolbar">
-            <div className="search-box">
-              <Search size={16} className="search-icon" />
-              <input
-                ref={searchInputRef}
-                type="search"
-                id="search-input"
-                data-testid="search-input"
-                className="search-input"
-                placeholder="Search tasks… (Press /)"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label="Search tasks by title or notes"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  className="search-clear-btn"
-                  onClick={() => setSearchQuery('')}
-                  aria-label="Clear search input"
-                  data-testid="search-clear-button"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div className="sort-select-wrap">
-                <select
-                  id="sort-select"
-                  data-testid="sort-select"
-                  className="sort-select"
-                  value={sort}
-                  onChange={(e) => updateSort(e.target.value)}
-                  aria-label="Sort tasks by"
-                >
-                  <option value={SORT_NEWEST}>Newest first</option>
-                  <option value={SORT_OLDEST}>Oldest first</option>
-                  <option value={SORT_DUE_DATE}>Due date</option>
-                  <option value={SORT_PRIORITY}>Priority</option>
-                </select>
-                <ArrowUpDown size={14} className="sort-icon" />
-              </div>
-
-              {/* Mobile Backup Button trigger */}
-              {isMobile && (
-                <button
-                  type="button"
-                  className="icon-btn"
-                  onClick={handleOpenImportExport}
-                  aria-label="Backup and Restore"
-                  title="Backup & Restore Data"
-                  style={{ border: '1px solid var(--border)', background: 'var(--surface)' }}
-                >
-                  <Database size={16} />
-                </button>
-              )}
-            </div>
-          </div>
+          <ListToolbar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onClearSearch={() => setSearchQuery('')}
+            sort={sort}
+            onSortChange={updateSort}
+            isMobile={isMobile}
+            onOpenImportExport={handleOpenImportExport}
+            searchInputRef={searchInputRef}
+          />
 
           {/* Screen reader search announcement */}
           {searchQuery && (

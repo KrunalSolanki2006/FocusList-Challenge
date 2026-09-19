@@ -1,4 +1,5 @@
 import React, { memo, useRef } from 'react';
+import PropTypes from 'prop-types';
 import { Pencil, Trash2, Calendar, AlertCircle, Flag, FileText } from 'lucide-react';
 import { Checkbox } from '../ui/Checkbox';
 import { IconButton } from '../ui/IconButton';
@@ -151,3 +152,20 @@ export const TaskItem = memo(function TaskItem({
     </tr>
   );
 });
+
+TaskItem.propTypes = {
+  task: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    completed: PropTypes.bool.isRequired,
+    priority: PropTypes.string,
+    dueDate: PropTypes.string,
+    notes: PropTypes.string
+  }).isRequired,
+  index: PropTypes.number.isRequired,
+  isSelected: PropTypes.bool,
+  onToggleSelect: PropTypes.func,
+  onToggle: PropTypes.func.isRequired,
+  onEdit: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired
+};
