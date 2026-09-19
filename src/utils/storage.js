@@ -5,6 +5,7 @@ import {
   SCHEMA_VERSION
 } from '../constants/storageKeys';
 import { FILTER_ALL, SORT_NEWEST } from '../constants/filters';
+import { migrateStoredData, sanitizeTaskRecord } from './migration';
 
 /**
  * Checks if localStorage is available and writable
@@ -12,7 +13,7 @@ import { FILTER_ALL, SORT_NEWEST } from '../constants/filters';
  */
 export function isStorageAvailable() {
   try {
-    const testKey = '__margin_storage_test__';
+    const testKey = '__focuslist_storage_test__';
     window.localStorage.setItem(testKey, testKey);
     window.localStorage.removeItem(testKey);
     return true;
@@ -37,7 +38,7 @@ export function isValidTask(task) {
 }
 
 /**
- * Loads tasks from localStorage with schema validation and corruption protection
+ * Loads tasks from localStorage with migration, schema validation and corruption protection
  * @returns {{ tasks: Array, isCorrupted: boolean, isBlocked: boolean }}
  */
 export function loadTasksFromStorage() {
@@ -52,22 +53,11 @@ export function loadTasksFromStorage() {
     }
 
     const parsed = JSON.parse(rawData);
+    const { tasks: validTasks } = migrateStoredData(parsed);
 
-    // If structure is valid schema { version: 1, tasks: [...] }
-    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.tasks)) {
-      const validTasks = parsed.tasks.filter(isValidTask);
-      return { tasks: validTasks, isCorrupted: false, isBlocked: false };
-    }
-
-    // Fallback: If array directly stored
-    if (Array.isArray(parsed)) {
-      const validTasks = parsed.filter(isValidTask);
-      return { tasks: validTasks, isCorrupted: false, isBlocked: false };
-    }
-
-    throw new Error('Invalid storage structure');
+    return { tasks: validTasks, isCorrupted: false, isBlocked: false };
   } catch (error) {
-    console.warn('[Margin Storage] Corrupt tasks detected, keeping backup.', error);
+    console.warn('[FocusList Storage] Corrupt tasks detected, keeping backup.', error);
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY_TASKS);
       if (raw) {
@@ -92,14 +82,15 @@ export function saveTasksToStorage(tasks) {
   }
 
   try {
+    const sanitizedTasks = Array.isArray(tasks) ? tasks.map(sanitizeTaskRecord).filter(Boolean) : [];
     const payload = JSON.stringify({
       version: SCHEMA_VERSION,
-      tasks
+      tasks: sanitizedTasks
     });
     window.localStorage.setItem(STORAGE_KEY_TASKS, payload);
     return { success: true, isBlocked: false };
   } catch (error) {
-    console.warn('[Margin Storage] Save failed (quota or access issue)', error);
+    console.warn('[FocusList Storage] Save failed (quota or access issue)', error);
     return { success: false, isBlocked: true };
   }
 }

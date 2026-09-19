@@ -95,6 +95,8 @@ export function TaskComposer({ onAddTask, inputRef }) {
           <input
             ref={inputRef}
             type="text"
+            id="new-task-input"
+            data-testid="new-task-input"
             className="composer-input"
             placeholder="Add a new task… (e.g. Design homepage hero)"
             value={title}
@@ -118,6 +120,8 @@ export function TaskComposer({ onAddTask, inputRef }) {
             size="sm"
             disabled={isOverLimit}
             aria-label="Add task"
+            data-testid="add-task-button"
+            id="add-task-btn"
           >
             {isJustAdded ? (
               <>

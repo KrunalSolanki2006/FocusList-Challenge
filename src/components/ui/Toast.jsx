@@ -25,6 +25,8 @@ export function Toast({ toast, onDismiss, onMouseEnter, onMouseLeave }) {
           <button
             type="button"
             className="toast-undo-btn"
+            data-testid="undo-button"
+            id="undo-btn"
             onClick={() => {
               toast.action.onClick();
               onDismiss(toast.id);

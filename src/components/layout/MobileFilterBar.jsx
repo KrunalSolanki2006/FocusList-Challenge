@@ -1,6 +1,13 @@
 import React from 'react';
-import { List, Circle, CheckCircle2, Eraser } from 'lucide-react';
-import { FILTER_ALL, FILTER_ACTIVE, FILTER_COMPLETED } from '../../constants/filters';
+import { List, Circle, CheckCircle2, Calendar, Clock, AlertTriangle, Eraser } from 'lucide-react';
+import {
+  FILTER_ALL,
+  FILTER_ACTIVE,
+  FILTER_COMPLETED,
+  FILTER_TODAY,
+  FILTER_UPCOMING,
+  FILTER_OVERDUE
+} from '../../constants/filters';
 
 /**
  * MobileFilterBar component
@@ -8,7 +15,7 @@ import { FILTER_ALL, FILTER_ACTIVE, FILTER_COMPLETED } from '../../constants/fil
  * @param {{
  *  currentFilter: string,
  *  onFilterChange: (filter: string) => void,
- *  counts: { total: number, active: number, completed: number },
+ *  counts: { total: number, active: number, completed: number, today?: number, upcoming?: number, overdue?: number },
  *  onClearCompleted: () => void
  * }} props
  */
@@ -25,6 +32,7 @@ export function MobileFilterBar({
         className={`mobile-filter-btn ${currentFilter === FILTER_ALL ? 'active' : ''}`}
         onClick={() => onFilterChange(FILTER_ALL)}
         aria-pressed={currentFilter === FILTER_ALL}
+        data-testid="mobile-filter-all"
       >
         <List size={16} />
         <span>All</span>
@@ -36,6 +44,7 @@ export function MobileFilterBar({
         className={`mobile-filter-btn ${currentFilter === FILTER_ACTIVE ? 'active' : ''}`}
         onClick={() => onFilterChange(FILTER_ACTIVE)}
         aria-pressed={currentFilter === FILTER_ACTIVE}
+        data-testid="mobile-filter-active"
       >
         <Circle size={16} />
         <span>Active</span>
@@ -47,10 +56,47 @@ export function MobileFilterBar({
         className={`mobile-filter-btn ${currentFilter === FILTER_COMPLETED ? 'active' : ''}`}
         onClick={() => onFilterChange(FILTER_COMPLETED)}
         aria-pressed={currentFilter === FILTER_COMPLETED}
+        data-testid="mobile-filter-completed"
       >
         <CheckCircle2 size={16} />
         <span>Done</span>
         <span className="tabular-nums">({counts.completed})</span>
+      </button>
+
+      <button
+        type="button"
+        className={`mobile-filter-btn ${currentFilter === FILTER_TODAY ? 'active' : ''}`}
+        onClick={() => onFilterChange(FILTER_TODAY)}
+        aria-pressed={currentFilter === FILTER_TODAY}
+        data-testid="mobile-filter-today"
+      >
+        <Calendar size={16} />
+        <span>Today</span>
+        <span className="tabular-nums">({counts.today || 0})</span>
+      </button>
+
+      <button
+        type="button"
+        className={`mobile-filter-btn ${currentFilter === FILTER_UPCOMING ? 'active' : ''}`}
+        onClick={() => onFilterChange(FILTER_UPCOMING)}
+        aria-pressed={currentFilter === FILTER_UPCOMING}
+        data-testid="mobile-filter-upcoming"
+      >
+        <Clock size={16} />
+        <span>Upcoming</span>
+        <span className="tabular-nums">({counts.upcoming || 0})</span>
+      </button>
+
+      <button
+        type="button"
+        className={`mobile-filter-btn ${currentFilter === FILTER_OVERDUE ? 'active' : ''}`}
+        onClick={() => onFilterChange(FILTER_OVERDUE)}
+        aria-pressed={currentFilter === FILTER_OVERDUE}
+        data-testid="mobile-filter-overdue"
+      >
+        <AlertTriangle size={16} />
+        <span>Overdue</span>
+        <span className="tabular-nums">({counts.overdue || 0})</span>
       </button>
 
       {counts.completed > 0 && (
@@ -59,6 +105,7 @@ export function MobileFilterBar({
           className="mobile-filter-btn"
           onClick={onClearCompleted}
           style={{ color: 'var(--error)' }}
+          data-testid="mobile-clear-completed-button"
         >
           <Eraser size={16} />
           <span>Clear ({counts.completed})</span>

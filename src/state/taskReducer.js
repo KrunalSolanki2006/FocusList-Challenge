@@ -4,8 +4,9 @@ import { PRIORITY_NONE } from '../constants/priorities';
 
 export const INITIAL_STATE = {
   tasks: [],
-  lastDeleted: null, // { task, index }
-  lastCleared: null, // Array<{ task, index }>
+  lastAction: null, // { type: string, tasksWithIndices: Array<{ task, index }>, message: string }
+  lastDeleted: null, // backward compatibility
+  lastCleared: null, // backward compatibility
   isCorrupted: false,
   isBlocked: false,
   hasHydrated: false
@@ -20,7 +21,7 @@ export const INITIAL_STATE = {
 export function taskReducer(state, action) {
   switch (action.type) {
     case 'HYDRATE': {
-      const { tasks, isCorrupted, isBlocked } = action.payload;
+      const { tasks, isCorrupted, isBlocked } = action.payload || {};
       return {
         ...state,
         tasks: Array.isArray(tasks) ? tasks : [],
@@ -31,7 +32,7 @@ export function taskReducer(state, action) {
     }
 
     case 'ADD': {
-      const { title, priority = PRIORITY_NONE, dueDate = null, notes = '' } = action.payload;
+      const { title, priority = PRIORITY_NONE, dueDate = null, notes = '' } = action.payload || {};
       const normalizedTitle = normalizeTitle(title);
       if (!normalizedTitle) return state;
 
@@ -53,7 +54,7 @@ export function taskReducer(state, action) {
     }
 
     case 'TOGGLE': {
-      const { id } = action.payload;
+      const { id } = action.payload || {};
       const now = new Date().toISOString();
 
       return {
@@ -71,7 +72,7 @@ export function taskReducer(state, action) {
     }
 
     case 'UPDATE': {
-      const { id, title, priority, dueDate, notes } = action.payload;
+      const { id, title, priority, dueDate, notes } = action.payload || {};
       const normalizedTitle = normalizeTitle(title);
       if (!normalizedTitle) return state;
 
@@ -91,7 +92,7 @@ export function taskReducer(state, action) {
     }
 
     case 'DELETE': {
-      const { id } = action.payload;
+      const { id } = action.payload || {};
       const index = state.tasks.findIndex((t) => t.id === id);
       if (index === -1) return state;
 
@@ -101,7 +102,62 @@ export function taskReducer(state, action) {
       return {
         ...state,
         tasks: remainingTasks,
+        lastAction: {
+          type: 'DELETE',
+          tasksWithIndices: [{ task: taskToDelete, index }],
+          message: `Deleted "${taskToDelete.title}"`
+        },
         lastDeleted: { task: taskToDelete, index },
+        lastCleared: null
+      };
+    }
+
+    case 'BULK_COMPLETE': {
+      const { ids } = action.payload || {};
+      if (!Array.isArray(ids) || ids.length === 0) return state;
+      const idSet = new Set(ids);
+      const now = new Date().toISOString();
+
+      return {
+        ...state,
+        tasks: state.tasks.map((task) => {
+          if (idSet.has(task.id) && !task.completed) {
+            return {
+              ...task,
+              completed: true,
+              completedAt: now
+            };
+          }
+          return task;
+        })
+      };
+    }
+
+    case 'BULK_DELETE': {
+      const { ids } = action.payload || {};
+      if (!Array.isArray(ids) || ids.length === 0) return state;
+      const idSet = new Set(ids);
+
+      const deletedWithIndices = [];
+      state.tasks.forEach((task, index) => {
+        if (idSet.has(task.id)) {
+          deletedWithIndices.push({ task, index });
+        }
+      });
+
+      if (deletedWithIndices.length === 0) return state;
+
+      const remainingTasks = state.tasks.filter((t) => !idSet.has(t.id));
+
+      return {
+        ...state,
+        tasks: remainingTasks,
+        lastAction: {
+          type: 'BULK_DELETE',
+          tasksWithIndices: deletedWithIndices,
+          message: `Deleted ${deletedWithIndices.length} ${deletedWithIndices.length === 1 ? 'task' : 'tasks'}`
+        },
+        lastDeleted: null,
         lastCleared: null
       };
     }
@@ -121,51 +177,86 @@ export function taskReducer(state, action) {
       return {
         ...state,
         tasks: remainingTasks,
+        lastAction: {
+          type: 'CLEAR_COMPLETED',
+          tasksWithIndices: completedWithIndices,
+          message: `Cleared ${completedWithIndices.length} completed ${completedWithIndices.length === 1 ? 'task' : 'tasks'}`
+        },
         lastCleared: completedWithIndices,
         lastDeleted: null
       };
     }
 
-    case 'RESTORE_DELETED': {
-      if (!state.lastDeleted) return state;
-      const { task, index } = state.lastDeleted;
-
-      // Restore task at its original index or clamp
-      const updatedTasks = [...state.tasks];
-      const insertIndex = Math.min(Math.max(0, index), updatedTasks.length);
-      updatedTasks.splice(insertIndex, 0, task);
-
-      return {
-        ...state,
-        tasks: updatedTasks,
-        lastDeleted: null
-      };
-    }
-
+    case 'RESTORE_LAST_ACTION':
+    case 'RESTORE_DELETED':
     case 'RESTORE_CLEARED': {
-      if (!state.lastCleared || state.lastCleared.length === 0) return state;
+      // Check lastAction first
+      if (state.lastAction && Array.isArray(state.lastAction.tasksWithIndices)) {
+        const updatedTasks = [...state.tasks];
+        const sorted = [...state.lastAction.tasksWithIndices].sort((a, b) => a.index - b.index);
+        sorted.forEach(({ task, index }) => {
+          const insertIndex = Math.min(Math.max(0, index), updatedTasks.length);
+          updatedTasks.splice(insertIndex, 0, task);
+        });
 
-      // Reinsert all cleared tasks
-      const updatedTasks = [...state.tasks];
-      state.lastCleared.forEach(({ task, index }) => {
+        return {
+          ...state,
+          tasks: updatedTasks,
+          lastAction: null,
+          lastDeleted: null,
+          lastCleared: null
+        };
+      }
+
+      // Backward compatibility fallbacks
+      if (state.lastDeleted) {
+        const { task, index } = state.lastDeleted;
+        const updatedTasks = [...state.tasks];
         const insertIndex = Math.min(Math.max(0, index), updatedTasks.length);
         updatedTasks.splice(insertIndex, 0, task);
-      });
+        return { ...state, tasks: updatedTasks, lastDeleted: null };
+      }
 
-      return {
-        ...state,
-        tasks: updatedTasks,
-        lastCleared: null
-      };
+      if (state.lastCleared && state.lastCleared.length > 0) {
+        const updatedTasks = [...state.tasks];
+        state.lastCleared.forEach(({ task, index }) => {
+          const insertIndex = Math.min(Math.max(0, index), updatedTasks.length);
+          updatedTasks.splice(insertIndex, 0, task);
+        });
+        return { ...state, tasks: updatedTasks, lastCleared: null };
+      }
+
+      return state;
     }
 
     case 'IMPORT': {
-      const importedTasks = action.payload;
-      if (!Array.isArray(importedTasks)) return state;
+      const payload = action.payload;
+      let tasksToImport = null;
+      let mode = 'replace';
+
+      if (Array.isArray(payload)) {
+        tasksToImport = payload;
+      } else if (payload && typeof payload === 'object') {
+        tasksToImport = Array.isArray(payload.tasks) ? payload.tasks : null;
+        mode = payload.mode || 'replace';
+      }
+
+      if (!tasksToImport) return state;
+
+      if (mode === 'merge') {
+        const existingIds = new Set(state.tasks.map((t) => t.id));
+        const newUniqueTasks = tasksToImport.filter((t) => !existingIds.has(t.id));
+        return {
+          ...state,
+          tasks: [...state.tasks, ...newUniqueTasks],
+          lastAction: null
+        };
+      }
 
       return {
         ...state,
-        tasks: importedTasks
+        tasks: tasksToImport,
+        lastAction: null
       };
     }
 

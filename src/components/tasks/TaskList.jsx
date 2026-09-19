@@ -1,18 +1,41 @@
 import React from 'react';
 import { TaskItem } from './TaskItem';
+import { Checkbox } from '../ui/Checkbox';
 
 /**
- * TaskList component — Professional SaaS Table Form
+ * TaskList component — Professional SaaS Table Form with Multi-Select
  * @param {{
  *  tasks: Array,
+ *  selectedIds?: Set<string>,
+ *  onToggleSelect?: (id: string) => void,
+ *  onToggleSelectAll?: () => void,
  *  onToggle: (id: string) => void,
  *  onEdit: (task: any, triggerRef: React.RefObject<HTMLButtonElement>) => void,
  *  onDelete: (id: string) => void
  * }} props
  */
-export function TaskList({ tasks, onToggle, onEdit, onDelete }) {
-  const completedCount = tasks.filter((t) => t.completed).length;
-  const activeCount = tasks.length - completedCount;
+export const TaskList = React.memo(function TaskList({
+  tasks,
+  selectedIds = new Set(),
+  onToggleSelect,
+  onToggleSelectAll,
+  onToggle,
+  onEdit,
+  onDelete
+}) {
+  let completedCount = 0;
+  let selectedVisibleCount = 0;
+  const visibleCount = tasks.length;
+
+  for (let i = 0; i < visibleCount; i++) {
+    const t = tasks[i];
+    if (t.completed) completedCount++;
+    if (selectedIds.has(t.id)) selectedVisibleCount++;
+  }
+
+  const activeCount = visibleCount - completedCount;
+  const allVisibleSelected = visibleCount > 0 && selectedVisibleCount === visibleCount;
+  const someVisibleSelected = selectedVisibleCount > 0 && selectedVisibleCount < visibleCount;
 
   return (
     <div className="table-card">
@@ -20,6 +43,16 @@ export function TaskList({ tasks, onToggle, onEdit, onDelete }) {
         <table className="tasks-table" aria-label="Tasks list">
           <thead>
             <tr>
+              <th className="th-select" scope="col">
+                <Checkbox
+                  id="select-all-visible-tasks"
+                  checked={allVisibleSelected}
+                  indeterminate={someVisibleSelected}
+                  onChange={onToggleSelectAll}
+                  aria-label={allVisibleSelected ? 'Deselect all visible tasks' : 'Select all visible tasks'}
+                  disabled={tasks.length === 0}
+                />
+              </th>
               <th className="th-num" scope="col">No.</th>
               <th className="th-task" scope="col">Task ({tasks.length})</th>
               <th className="th-priority" scope="col">Priority</th>
@@ -33,6 +66,8 @@ export function TaskList({ tasks, onToggle, onEdit, onDelete }) {
                 key={task.id}
                 index={index + 1}
                 task={task}
+                isSelected={selectedIds.has(task.id)}
+                onToggleSelect={onToggleSelect}
                 onToggle={onToggle}
                 onEdit={onEdit}
                 onDelete={onDelete}
@@ -53,5 +88,5 @@ export function TaskList({ tasks, onToggle, onEdit, onDelete }) {
       </div>
     </div>
   );
-}
+});
 

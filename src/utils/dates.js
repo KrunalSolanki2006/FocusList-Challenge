@@ -37,6 +37,44 @@ export function isOverdue(dateStr, isCompleted = false) {
 }
 
 /**
+ * Checks if a given date string is upcoming (tomorrow onwards and not completed)
+ * @param {string|null} dateStr 
+ * @param {boolean} isCompleted 
+ * @returns {boolean}
+ */
+export function isUpcoming(dateStr, isCompleted = false) {
+  if (!dateStr || isCompleted) return false;
+  return dateStr > getTodayDateString();
+}
+
+/**
+ * Validates a YYYY-MM-DD date string
+ * @param {any} dateStr 
+ * @returns {boolean}
+ */
+export function isValidDateString(dateStr) {
+  if (dateStr === null || dateStr === undefined || dateStr === '') return true;
+  if (typeof dateStr !== 'string') return false;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
+}
+
+// Cached Intl formatters for maximum rendering performance (avoids repeated ICU instantiation)
+const shortDateFormatter = new Intl.DateTimeFormat('en-GB', {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short'
+});
+
+const headerDateFormatter = new Intl.DateTimeFormat('en-GB', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long'
+});
+
+/**
  * Formats a due date into a human-friendly label
  * e.g., "Today", "Tomorrow", "Overdue · 2 days", "Mon 22 Sep"
  * @param {string|null} dateStr 
@@ -44,14 +82,18 @@ export function isOverdue(dateStr, isCompleted = false) {
  * @returns {string|null}
  */
 export function formatDueLabel(dateStr, isCompleted = false) {
-  if (!dateStr) return null;
+  if (!dateStr || typeof dateStr !== 'string') return null;
 
+  const cleanDateStr = dateStr.trim();
   const todayStr = getTodayDateString();
-  if (dateStr === todayStr) {
+  if (cleanDateStr === todayStr) {
     return 'Today';
   }
 
-  const [y, m, d] = dateStr.split('-').map(Number);
+  const parts = cleanDateStr.split('-').map(Number);
+  if (parts.length !== 3 || parts.some(isNaN)) return cleanDateStr;
+
+  const [y, m, d] = parts;
   const targetDate = new Date(y, m - 1, d);
   const today = new Date();
   const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -71,12 +113,8 @@ export function formatDueLabel(dateStr, isCompleted = false) {
     return `Overdue · ${Math.abs(diffDays)} days`;
   }
 
-  // Format as "Mon 22 Sep"
-  return new Intl.DateTimeFormat('en-GB', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short'
-  }).format(targetDate);
+  // Format as "Mon 22 Sep" using hoisted formatter
+  return shortDateFormatter.format(targetDate);
 }
 
 /**
@@ -84,9 +122,6 @@ export function formatDueLabel(dateStr, isCompleted = false) {
  * @returns {string}
  */
 export function formatHeaderDate() {
-  return new Intl.DateTimeFormat('en-GB', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long'
-  }).format(new Date());
+  return headerDateFormatter.format(new Date());
 }
+

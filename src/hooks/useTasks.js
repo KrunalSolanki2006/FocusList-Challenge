@@ -43,20 +43,32 @@ export function useTasks() {
     dispatch({ type: 'DELETE', payload: { id } });
   }, []);
 
+  const bulkComplete = useCallback((ids) => {
+    dispatch({ type: 'BULK_COMPLETE', payload: { ids } });
+  }, []);
+
+  const bulkDelete = useCallback((ids) => {
+    dispatch({ type: 'BULK_DELETE', payload: { ids } });
+  }, []);
+
   const clearCompleted = useCallback(() => {
     dispatch({ type: 'CLEAR_COMPLETED' });
   }, []);
 
+  const restoreLastAction = useCallback(() => {
+    dispatch({ type: 'RESTORE_LAST_ACTION' });
+  }, []);
+
   const restoreDeleted = useCallback(() => {
-    dispatch({ type: 'RESTORE_DELETED' });
+    dispatch({ type: 'RESTORE_LAST_ACTION' });
   }, []);
 
   const restoreCleared = useCallback(() => {
-    dispatch({ type: 'RESTORE_CLEARED' });
+    dispatch({ type: 'RESTORE_LAST_ACTION' });
   }, []);
 
-  const importTasks = useCallback((tasks) => {
-    dispatch({ type: 'IMPORT', payload: tasks });
+  const importTasks = useCallback((payload) => {
+    dispatch({ type: 'IMPORT', payload });
   }, []);
 
   const dismissNotice = useCallback(() => {
@@ -69,7 +81,10 @@ export function useTasks() {
     toggleTask,
     updateTask,
     deleteTask,
+    bulkComplete,
+    bulkDelete,
     clearCompleted,
+    restoreLastAction,
     restoreDeleted,
     restoreCleared,
     importTasks,

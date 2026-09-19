@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { saveTasksToStorage } from '../utils/storage';
 import { STORAGE_KEY_TASKS } from '../constants/storageKeys';
+import { migrateStoredData } from '../utils/migration';
 
 /**
  * Debounced storage sync hook with cross-tab listener
@@ -11,8 +12,10 @@ import { STORAGE_KEY_TASKS } from '../constants/storageKeys';
 export function useLocalStorageSync(tasks, hasHydrated, onExternalUpdate) {
   const timeoutRef = useRef(null);
   const isInitialMount = useRef(true);
+  const currentTasksJsonRef = useRef('');
+  currentTasksJsonRef.current = JSON.stringify(tasks);
 
-  // Debounced save
+  // Immediate synchronous persistence on task state changes
   useEffect(() => {
     if (!hasHydrated) return;
 
@@ -21,30 +24,23 @@ export function useLocalStorageSync(tasks, hasHydrated, onExternalUpdate) {
       return;
     }
 
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      saveTasksToStorage(tasks);
-    }, 150);
-
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
+    // Save immediately and synchronously so automated tests and rapid refreshes never lose state
+    saveTasksToStorage(tasks);
   }, [tasks, hasHydrated]);
 
-  // Cross-tab sync via storage event
+  // Cross-tab sync via native storage event
   useEffect(() => {
     function handleStorageEvent(e) {
       if (e.key === STORAGE_KEY_TASKS && e.newValue) {
         try {
           const parsed = JSON.parse(e.newValue);
-          const newTasks = parsed.tasks || (Array.isArray(parsed) ? parsed : null);
-          if (Array.isArray(newTasks) && typeof onExternalUpdate === 'function') {
-            onExternalUpdate(newTasks);
+          const { tasks: validTasks } = migrateStoredData(parsed);
+
+          // Prevent loop or redundant state updates if identical
+          if (JSON.stringify(validTasks) !== currentTasksJsonRef.current) {
+            if (typeof onExternalUpdate === 'function') {
+              onExternalUpdate(validTasks);
+            }
           }
         } catch {
           // Ignore invalid cross-tab payload

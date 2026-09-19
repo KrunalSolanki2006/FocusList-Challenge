@@ -18,6 +18,8 @@ import { PRIORITY_CONFIG, PRIORITY_NONE } from '../../constants/priorities';
  *    notes?: string
  *  },
  *  index: number,
+ *  isSelected?: boolean,
+ *  onToggleSelect?: (id: string) => void,
  *  onToggle: (id: string) => void,
  *  onEdit: (task: any, triggerRef: React.RefObject<HTMLButtonElement>) => void,
  *  onDelete: (id: string) => void
@@ -26,6 +28,8 @@ import { PRIORITY_CONFIG, PRIORITY_NONE } from '../../constants/priorities';
 export const TaskItem = memo(function TaskItem({
   task,
   index,
+  isSelected = false,
+  onToggleSelect,
   onToggle,
   onEdit,
   onDelete
@@ -41,9 +45,21 @@ export const TaskItem = memo(function TaskItem({
 
   return (
     <tr
-      className={`task-table-row ${task.completed ? 'is-completed' : ''}`}
+      className={`task-table-row ${task.completed ? 'is-completed' : ''} ${isSelected ? 'is-selected' : ''}`}
       id={`task-item-${task.id}`}
+      data-testid="task-item"
     >
+      {/* 0. SELECTION CHECKBOX */}
+      <td className="td-select">
+        <Checkbox
+          id={`task-select-${task.id}`}
+          checked={isSelected}
+          onChange={() => onToggleSelect && onToggleSelect(task.id)}
+          aria-label={`Select task: ${task.title}`}
+          data-testid="task-select-checkbox"
+        />
+      </td>
+
       {/* 1. NO. */}
       <td className="td-num">
         <span className="table-num-badge">
@@ -59,13 +75,18 @@ export const TaskItem = memo(function TaskItem({
             checked={task.completed}
             onChange={() => onToggle(task.id)}
             aria-labelledby={`task-title-${task.id}`}
+            data-testid="task-checkbox"
           />
           <div className="task-cell-text">
-            <span id={`task-title-${task.id}`} className="task-table-title">
+            <span
+              id={`task-title-${task.id}`}
+              className="task-table-title"
+              data-testid="task-title"
+            >
               {task.title}
             </span>
             {task.notes && (
-              <span className="task-table-notes" title={task.notes}>
+              <span className="task-table-notes" title={task.notes} data-testid="task-notes">
                 <FileText size={11} />
                 <span>{task.notes}</span>
               </span>
@@ -77,7 +98,7 @@ export const TaskItem = memo(function TaskItem({
       {/* 3. PRIORITY */}
       <td className="td-priority">
         {hasPriority ? (
-          <span className={`table-pill-priority priority-${task.priority}`}>
+          <span className={`table-pill-priority priority-${task.priority}`} data-testid="task-priority-badge">
             <Flag size={11} strokeWidth={2.2} />
             <span>{priorityConfig.label}</span>
           </span>
@@ -93,6 +114,7 @@ export const TaskItem = memo(function TaskItem({
             className={`table-pill-date ${
               dueToday ? 'date-today' : overdue ? 'date-overdue' : 'date-normal'
             }`}
+            data-testid="task-due-badge"
           >
             {overdue ? <AlertCircle size={11} strokeWidth={2.2} /> : <Calendar size={11} strokeWidth={2.2} />}
             <span>{dueLabel}</span>
@@ -110,6 +132,7 @@ export const TaskItem = memo(function TaskItem({
             aria-label={`Edit "${task.title}"`}
             onClick={() => onEdit(task, editButtonRef)}
             className="table-action-btn edit-btn"
+            data-testid="task-edit-button"
           >
             <Pencil size={14} />
           </IconButton>
@@ -119,6 +142,7 @@ export const TaskItem = memo(function TaskItem({
             aria-label={`Delete "${task.title}"`}
             onClick={() => onDelete(task.id)}
             className="table-action-btn delete-btn"
+            data-testid="task-delete-button"
           >
             <Trash2 size={14} />
           </IconButton>

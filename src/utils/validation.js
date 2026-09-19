@@ -7,21 +7,30 @@ export const MAX_NOTES_LENGTH = 500;
 
 /**
  * Normalizes title string by trimming outer whitespace and collapsing internal whitespace
- * @param {string} title 
+ * @param {any} title 
  * @returns {string}
  */
 export function normalizeTitle(title) {
-  if (!title) return '';
-  return title.trim().replace(/\s+/g, ' ');
+  if (title === null || title === undefined) return '';
+  const str = typeof title === 'string' ? title : String(title);
+  return str.trim().replace(/\s+/g, ' ');
 }
 
 /**
  * Validates task title
- * @param {string} title 
+ * @param {any} title 
  * @returns {{ isValid: boolean, error: string | null }}
  */
 export function validateTitle(title) {
-  const trimmed = (title || '').trim();
+  if (title === null || title === undefined) {
+    return {
+      isValid: false,
+      error: 'Give your task a title.'
+    };
+  }
+
+  const str = typeof title === 'string' ? title : String(title);
+  const trimmed = str.trim();
   if (!trimmed) {
     return {
       isValid: false,
@@ -44,13 +53,16 @@ export function validateTitle(title) {
 
 /**
  * Validates task notes
- * @param {string} notes 
+ * @param {any} notes 
  * @returns {{ isValid: boolean, error: string | null }}
  */
 export function validateNotes(notes) {
-  if (!notes) return { isValid: true, error: null };
+  if (notes === null || notes === undefined || notes === '') {
+    return { isValid: true, error: null };
+  }
 
-  if (notes.length > MAX_NOTES_LENGTH) {
+  const str = typeof notes === 'string' ? notes : String(notes);
+  if (str.length > MAX_NOTES_LENGTH) {
     return {
       isValid: false,
       error: 'Notes must be 500 characters or fewer.'
@@ -62,3 +74,4 @@ export function validateNotes(notes) {
     error: null
   };
 }
+
